@@ -1,6 +1,5 @@
 ﻿using Sah.SutBuilder.InventoryService.Services.Marketing;
 using Sah.SutBuilder.InventoryService.Services.Prediction;
-using Sah.SutBuilder.InventoryService.Services.Receivables;
 using Sah.SutBuilder.InventoryService.Services.Warehouse;
 
 namespace Sah.SutBuilder.InventoryService.Tests._0_With_Concretes
@@ -22,7 +21,6 @@ namespace Sah.SutBuilder.InventoryService.Tests._0_With_Concretes
             var actual = await Assert.That(() => new ManageStock(
                     null!,
                     new PredictionService(),
-                    new ReceivablesService(),
                     new WarehouseService()))
                 .Throws<ArgumentNullException>();
 
@@ -39,25 +37,6 @@ namespace Sah.SutBuilder.InventoryService.Tests._0_With_Concretes
             // Act & Assert
             var actual = await Assert.That(() => new ManageStock(
                     new MarketingService(),
-                    null!,
-                    new ReceivablesService(),
-                    new WarehouseService()))
-                .Throws<ArgumentNullException>();
-
-            // Assert
-            await Assert.That(actual!.Message).IsEqualTo(expected.Message);
-        }
-
-        [Test]
-        public async Task Constructor_WhenReceivablesServiceIsNull_ThrowsCorrectException()
-        {
-            // Arrange
-            var expected = new ArgumentNullException("receivablesService");
-
-            // Act & Assert
-            var actual = await Assert.That(() => new ManageStock(
-                    new MarketingService(),
-                    new PredictionService(),
                     null!,
                     new WarehouseService()))
                 .Throws<ArgumentNullException>();
@@ -76,7 +55,6 @@ namespace Sah.SutBuilder.InventoryService.Tests._0_With_Concretes
             var actual = await Assert.That(() => new ManageStock(
                     new MarketingService(),
                     new PredictionService(),
-                    new ReceivablesService(),
                     null!))
                 .Throws<ArgumentNullException>();
 
@@ -92,12 +70,13 @@ namespace Sah.SutBuilder.InventoryService.Tests._0_With_Concretes
             var sut = new ManageStock(
                 new MarketingService(),
                 new PredictionService(),
-                new ReceivablesService(),
                 new WarehouseService());
 
             // Act
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
             var actual = await Assert.That(() => sut.ReorderAsync(productId))
                 .Throws<NotImplementedException>();
+#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
 
             // Assert
             // Impossible to test the code because the services aren't implemented!!!

@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sah.SutBuilder.InventoryService\InventoryService.csproj" />
+    <ProjectReference Include="..\InventoryService\InventoryService.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

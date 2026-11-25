@@ -1,6 +1,4 @@
-﻿using Sah.SutBuilder.InventoryService.Services.Marketing;
-using Sah.SutBuilder.InventoryService.Services.Prediction;
-using Sah.SutBuilder.InventoryService.Services.Receivables;
+﻿using Moq;
 using Sah.SutBuilder.InventoryService.Services.Warehouse;
 
 namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
@@ -26,7 +24,6 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
             var actual = await Assert.That(() => new ManageStock(
                 null!,
                 builder.MockPredictionService!.Object,
-                builder.MockReceivablesService!.Object,
                 builder.MockWarehouseService!.Object))
                 .Throws<ArgumentNullException>();
 
@@ -45,27 +42,6 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
             // Act & Assert
             var actual = await Assert.That(() => new ManageStock(
                 builder.MockMarketingService!.Object,
-                null!,
-                builder.MockReceivablesService!.Object,
-                builder.MockWarehouseService!.Object))
-                .Throws<ArgumentNullException>();
-
-            // Assert
-            await Assert.That(actual!.Message).IsEqualTo(expected.Message);
-        }
-
-        [Test]
-        public async Task Constructor_WhenReceivablesServiceIsNull_ThrowsCorrectException()
-        {
-            // Arrange
-            var builder = new ManageStockSutBuilder()
-                .WithDefaultMocks();
-            var expected = new ArgumentNullException("receivablesService");
-
-            // Act & Assert
-            var actual = await Assert.That(() => new ManageStock(
-                builder.MockMarketingService!.Object,
-                builder.MockPredictionService!.Object,
                 null!,
                 builder.MockWarehouseService!.Object))
                 .Throws<ArgumentNullException>();
@@ -86,7 +62,6 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
             var actual = await Assert.That(() => new ManageStock(
                 builder.MockMarketingService!.Object,
                 builder.MockPredictionService!.Object,
-                builder.MockReceivablesService!.Object,
                 null!))
                 .Throws<ArgumentNullException>();
 
@@ -106,7 +81,7 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
             {
                 Id = Guid.NewGuid(),
                 ProductId = builder.ProductId,
-                Amount = 450
+                Amount = 475
             };
 
             // Act
@@ -120,6 +95,32 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
                 await Assert.That(actual.ProductId).IsEqualTo(expected.ProductId);
                 await Assert.That(actual.Amount).IsEqualTo(expected.Amount);
             }
+        }
+
+        [Test]
+        public async Task Reorder_WhenWarehouseServiceFails_ThrowsCorrectException()
+        {
+            // Arrange
+            var expected = new ApplicationException("TestWarehouseException");
+            var mockWarehouseService = new Mock<IWarehouseService>();
+            mockWarehouseService!
+                .Setup(x => x.GetCurrentStockAsync(It.IsAny<Guid>()))
+                .ThrowsAsync(new ApplicationException(expected.Message));
+
+            var builder = new ManageStockSutBuilder()
+                .WithDefaultData()
+                .WithDefaultMocks()
+                .WithMockWarehouseService(mockWarehouseService);
+            var sut = builder.Build();
+
+            // Act & Assert
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type.
+            var actual = await Assert.That(() => sut.ReorderAsync(builder.ProductId))
+                .Throws<ApplicationException>();
+#pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
+
+            // Assert
+            await Assert.That(actual!.Message).IsEqualTo(expected.Message);
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Moq;
 using Sah.SutBuilder.InventoryService.Services.Marketing;
 using Sah.SutBuilder.InventoryService.Services.Prediction;
-using Sah.SutBuilder.InventoryService.Services.Receivables;
 using Sah.SutBuilder.InventoryService.Services.Warehouse;
 
 namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
@@ -59,19 +58,6 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
             return this;
         }
 
-        public Mock<IReceivablesService>? MockReceivablesService { get; set; }
-        public ManageStockSutBuilder WithDefaultMockReceivablesService()
-        {
-            var mock = new Mock<IReceivablesService>();
-            // Put setups here.
-            return WithMockReceivablesService(mock);
-        }
-        public ManageStockSutBuilder WithMockReceivablesService(Mock<IReceivablesService> mock)
-        {
-            MockReceivablesService = mock;
-            return this;
-        }
-
         public Mock<IWarehouseService>? MockWarehouseService { get; set; }
         public ManageStockSutBuilder WithDefaultMockWarehouseService()
         {
@@ -104,13 +90,11 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
         public ManageStockSutBuilder WithDefaultMocks() =>
             this.WithDefaultMockMarketingService()
             .WithDefaultMockPredictionService()
-            .WithDefaultMockReceivablesService()
             .WithDefaultMockWarehouseService();
 
         public ManageStock Build() => new ManageStock(
             MockMarketingService!.Object,
             MockPredictionService!.Object,
-            MockReceivablesService!.Object,
             MockWarehouseService!.Object);
     }
 }

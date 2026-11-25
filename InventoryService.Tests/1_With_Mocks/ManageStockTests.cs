@@ -1,7 +1,6 @@
 ﻿using Moq;
 using Sah.SutBuilder.InventoryService.Services.Marketing;
 using Sah.SutBuilder.InventoryService.Services.Prediction;
-using Sah.SutBuilder.InventoryService.Services.Receivables;
 using Sah.SutBuilder.InventoryService.Services.Warehouse;
 
 namespace Sah.SutBuilder.InventoryService.Tests._1_With_SutBuilder
@@ -28,7 +27,6 @@ namespace Sah.SutBuilder.InventoryService.Tests._1_With_SutBuilder
             var actual = await Assert.That(() => new ManageStock(
                     null!,
                     Mock.Of<IPredictionService>(),
-                    Mock.Of<IReceivablesService>(),
                     Mock.Of<IWarehouseService>()))
                 .Throws<ArgumentNullException>();
 
@@ -45,25 +43,6 @@ namespace Sah.SutBuilder.InventoryService.Tests._1_With_SutBuilder
             // Act & Assert
             var actual = await Assert.That(() => new ManageStock(
                     Mock.Of<MarketingService>(),
-                    null!,
-                    Mock.Of<IReceivablesService>(),
-                    Mock.Of<IWarehouseService>()))
-                .Throws<ArgumentNullException>();
-
-            // Assert
-            await Assert.That(actual!.Message).IsEqualTo(expected.Message);
-        }
-
-        [Test]
-        public async Task Constructor_WhenReceivablesServiceIsNull_ThrowsCorrectException()
-        {
-            // Arrange
-            var expected = new ArgumentNullException("receivablesService");
-
-            // Act & Assert
-            var actual = await Assert.That(() => new ManageStock(
-                    Mock.Of<MarketingService>(),
-                    Mock.Of<IPredictionService>(),
                     null!,
                     Mock.Of<IWarehouseService>()))
                 .Throws<ArgumentNullException>();
@@ -82,7 +61,6 @@ namespace Sah.SutBuilder.InventoryService.Tests._1_With_SutBuilder
             var actual = await Assert.That(() => new ManageStock(
                     Mock.Of<MarketingService>(),
                     Mock.Of<IPredictionService>(),
-                    Mock.Of<IReceivablesService>(),
                     null!))
                 .Throws<ArgumentNullException>();
 
@@ -114,7 +92,6 @@ namespace Sah.SutBuilder.InventoryService.Tests._1_With_SutBuilder
                 SalesStart = s,
                 SalesEnd = e,
             });
-            var mockReceivablesService = new Mock<IReceivablesService>();
             var mockWarehouseService = new Mock<IWarehouseService>();
             mockWarehouseService.Setup(x => x.GetCurrentStockAsync(productId))
                 .ReturnsAsync(new StockDto()
@@ -127,13 +104,12 @@ namespace Sah.SutBuilder.InventoryService.Tests._1_With_SutBuilder
             var sut = new ManageStock(
                 mockMarketingService.Object,
                 mockPredictionService.Object,
-                mockReceivablesService.Object,
                 mockWarehouseService.Object);
             var expected = new Order()
             {
                 Id = Guid.NewGuid(), // This needs to be ignored in the assertion.
                 ProductId = productId,
-                Amount = 450,
+                Amount = 475,
             };
 
             // Act
