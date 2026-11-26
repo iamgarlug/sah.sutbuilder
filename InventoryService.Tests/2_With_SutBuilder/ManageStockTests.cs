@@ -81,7 +81,7 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
             {
                 Id = Guid.NewGuid(),
                 ProductId = builder.ProductId,
-                Amount = 475
+                Amount = 625
             };
 
             // Act
@@ -101,16 +101,19 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
         public async Task Reorder_WhenWarehouseServiceFails_ThrowsCorrectException()
         {
             // Arrange
-            var expected = new ApplicationException("TestWarehouseException");
+            var builder = new ManageStockSutBuilder()
+                .WithDefaultData()
+                .WithDefaultMocks();
+
+            // Override the warehouse service.
+            var warhouseException = new ApplicationException("TestWarehouseException");
             var mockWarehouseService = new Mock<IWarehouseService>();
             mockWarehouseService!
                 .Setup(x => x.GetCurrentStockAsync(It.IsAny<Guid>()))
-                .ThrowsAsync(new ApplicationException(expected.Message));
+                .ThrowsAsync(warhouseException);
+            builder.WithMockWarehouseService(mockWarehouseService);
 
-            var builder = new ManageStockSutBuilder()
-                .WithDefaultData()
-                .WithDefaultMocks()
-                .WithMockWarehouseService(mockWarehouseService);
+            // Finally build the SUT.
             var sut = builder.Build();
 
             // Act & Assert
@@ -120,7 +123,13 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
 #pragma warning restore CS8619 // Nullability of reference types in value doesn't match target type.
 
             // Assert
-            await Assert.That(actual!.Message).IsEqualTo(expected.Message);
+            using (Assert.Multiple())
+            {
+                await Assert.That(actual!.Message).IsEqualTo($"Reorder failed for product {builder.ProductId}");
+                var aggregate = actual!.InnerException as AggregateException;
+                await Assert.That(aggregate).IsNotNull();
+                await Assert.That(aggregate.InnerExceptions).Contains(warhouseException);
+            }
         }
     }
 }

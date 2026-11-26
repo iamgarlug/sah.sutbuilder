@@ -45,7 +45,7 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
                 {
                     Id = Guid.NewGuid(),
                     ProductId = p,
-                    Sales = 100,
+                    Sales = 750,
                     SalesStart = s,
                     SalesEnd = e,
                 });

@@ -23,28 +23,27 @@ namespace Sah.SutBuilder.InventoryService
 
         public async Task<Order> ReorderAsync(Guid productId)
         {
+            var marketingTask = MarketingService.GetSocialMediaRankingsAsync(productId);
+            var predictionTask = PredictionService.PredictSalesAsync(productId, DateTime.Parse("2026-01-01"), DateTime.Parse("2026-12-31"));
+            var warehouseTask = WarehouseService.GetCurrentStockAsync(productId);
+
+            var tasks = Task.WhenAll([
+                marketingTask,
+                predictionTask,
+                warehouseTask]);
+
             try
             {
-                var marketingTask = MarketingService.GetSocialMediaRankingsAsync(productId);
-                var predictionTask = PredictionService.PredictSalesAsync(productId, DateTime.Parse("2026-01-01"), DateTime.Parse("2026-12-31"));
-                var warehouseTask = WarehouseService.GetCurrentStockAsync(productId);
-
-                await Task.WhenAll([
-                    marketingTask,
-                    predictionTask,
-                    warehouseTask]);
+                await tasks;
 
                 var socialMediaRankings = marketingTask.Result;
                 var popularity = predictionTask.Result;
                 var stock = warehouseTask.Result;
 
-                var mediaFactor = (socialMediaRankings.Instagram + socialMediaRankings.TikTok + socialMediaRankings.X) / 3;
-                var predictedPurchaseAmount = popularity.Sales * mediaFactor;
-                var amount = Math.Max(
-                    0,
-                    (int)Math.Round(
-                        stock.Amount - predictedPurchaseAmount * mediaFactor,
-                        0));
+                // Simplified: no minimum stock kept; the focus of this repo is the test structure.
+                var mediaFactor = 1 + (socialMediaRankings.Instagram + socialMediaRankings.TikTok + socialMediaRankings.X) / 3;
+                int predictedPurchaseAmount = (int)Math.Round(popularity.Sales * mediaFactor);
+                var amount = Math.Max(0, predictedPurchaseAmount - stock.Amount);
 
                 var order = new Order()
                 {
@@ -55,12 +54,11 @@ namespace Sah.SutBuilder.InventoryService
 
                 return order;
             }
-            catch (AggregateException aex)
+            catch (Exception) when (tasks.Exception is not null)
             {
-                var sb = new StringBuilder();
-                foreach (var ex in aex.InnerExceptions)
-                    sb.AppendLine(ex.Message);
-                throw new ApplicationException(sb.ToString());
+                throw new ApplicationException(
+                    $"Reorder failed for product {productId}",
+                    tasks.Exception);
             }
         }
     }

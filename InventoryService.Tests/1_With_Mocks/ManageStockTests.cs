@@ -88,7 +88,7 @@ namespace Sah.SutBuilder.InventoryService.Tests._1_With_SutBuilder
             {
                 Id = Guid.NewGuid(),
                 ProductId = p,
-                Sales = 100,
+                Sales = 750,
                 SalesStart = s,
                 SalesEnd = e,
             });
@@ -109,7 +109,7 @@ namespace Sah.SutBuilder.InventoryService.Tests._1_With_SutBuilder
             {
                 Id = Guid.NewGuid(), // This needs to be ignored in the assertion.
                 ProductId = productId,
-                Amount = 475,
+                Amount = 625,
             };
 
             // Act
