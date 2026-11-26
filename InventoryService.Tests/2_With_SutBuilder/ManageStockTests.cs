@@ -106,11 +106,11 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
                 .WithDefaultMocks();
 
             // Override the warehouse service.
-            var warhouseException = new ApplicationException("TestWarehouseException");
+            var warehouseException = new ApplicationException("TestWarehouseException");
             var mockWarehouseService = new Mock<IWarehouseService>();
-            mockWarehouseService!
+            mockWarehouseService
                 .Setup(x => x.GetCurrentStockAsync(It.IsAny<Guid>()))
-                .ThrowsAsync(warhouseException);
+                .ThrowsAsync(warehouseException);
             builder.WithMockWarehouseService(mockWarehouseService);
 
             // Finally build the SUT.
@@ -128,7 +128,7 @@ namespace Sah.SutBuilder.InventoryService.Tests._2_With_SutBuilder
                 await Assert.That(actual!.Message).IsEqualTo($"Reorder failed for product {builder.ProductId}");
                 var aggregate = actual!.InnerException as AggregateException;
                 await Assert.That(aggregate).IsNotNull();
-                await Assert.That(aggregate.InnerExceptions).Contains(warhouseException);
+                await Assert.That(aggregate.InnerExceptions).Contains(warehouseException);
             }
         }
     }

@@ -1,7 +1,6 @@
 ﻿using Sah.SutBuilder.InventoryService.Services.Marketing;
 using Sah.SutBuilder.InventoryService.Services.Prediction;
 using Sah.SutBuilder.InventoryService.Services.Warehouse;
-using System.Text;
 
 namespace Sah.SutBuilder.InventoryService
 {
