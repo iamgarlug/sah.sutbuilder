@@ -4,13 +4,24 @@ using Sah.SutBuilder.InventoryService.Services.Warehouse;
 
 namespace Sah.SutBuilder.InventoryService.Tests._0_With_Concretes
 {
+    /// <remarks>
+    /// This is the first pass at writing the tests. The simplest and most direct approach is to
+    /// use concrete instantiations of the dependencies.
+    /// This results in:
+    ///   1) Each test now has it's own copy of each service. If the services change then all
+    ///      tests need to be fixed.
+    ///   2) The instantiation of each service can be complicated. The ones I've created are very
+    ///      simple, but imagine if they required parameters and had dependencies themselves.
+
+    /// A logic next step is to create class scoped versions of the dependency services, but this
+    /// tends to create an even more problematic situation. Tests tend to differ slightly from
+    /// each other requiring subtly different parameters (e.g. the Sales Service takes different
+    /// dates). If we created helpers to create those class scoped services we'd need to add
+    /// branching logic to set them up (e.g. CreateSalesService(DateTime start, DateTime end).
+    /// Any programmatic logic (if-then) must be tested. Wow we're having to test our tests!
+    /// </remarks>
     public class ManageStockTests
     {
-        // Imagine if these services had constructor parameters?!?
-        // Imagine if the service parameters need to be set for the test.
-        // You might be tempted to create helper methods with if blocks to control constructor parameters, but now you need to test your test logic!
-        // Most importantly, we can't do any testing of value because the services aren't implemented!
-
         [Test]
         public async Task Constructor_WhenMarketingServiceIsNull_ThrowsCorrectException()
         {
